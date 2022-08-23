@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { login, getProfile, changeVendorProfile, changeVendorServiceProfile, addFood, fetchFood } from '../controllers'
+import { login, getProfile, changeVendorProfile, updateVendorCoverImages, changeVendorServiceProfile, addFood, fetchFood } from '../controllers'
 import { Authenticate } from '../middlewares';
 import multer from 'multer';
 
@@ -22,6 +22,8 @@ router.post('/login', login)
 router.get('/profile', Authenticate,getProfile);
 
 router.put('/profile/:id', Authenticate, changeVendorProfile);
+
+router.purge('/profile/coverimage/:id', Authenticate, images.array('images', 11), updateVendorCoverImages);
 
 router.patch('/profile/service/:id', Authenticate, changeVendorServiceProfile);
 

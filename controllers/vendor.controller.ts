@@ -95,6 +95,39 @@ export const changeVendorProfile = async (req: Request, res: Response, next: Nex
     }
 };
 
+export const updateVendorCoverImages = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+
+        if (user) {
+
+            const vendor = await findVendor(user._id);
+
+            const files = req.files as [Express.Multer.File];
+
+            const images = files.map((file: Express.Multer.File) => file.filename);
+
+            if (vendor !== null) {
+                vendor.coverImages.push(...images);
+
+                const result = await vendor.save();
+
+                return res.status(200).json({
+                    message: 'vendor cover images updated successfully',
+                    result
+                })
+            }
+        }
+
+        return res.status(404).json({
+            message: 'Vendor Not Found!'
+        });
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
 export const changeVendorServiceProfile = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
 
