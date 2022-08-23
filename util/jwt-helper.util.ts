@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
-import {Request, Response} from 'express';
+import {Request} from 'express';
 import { JWT_SECRET } from '../configs';
-import { vendorPayload } from '../dto';
 import { authPayload } from '../dto/auth.dto';
 
 export const generateAuthToken = async (payload: authPayload) => {
