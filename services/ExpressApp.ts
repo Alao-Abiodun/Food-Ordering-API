@@ -3,7 +3,7 @@ import path from 'path';
 import morgan from 'morgan';
 
 
-import { adminRouter, vendorRouter } from '../routes';
+import { adminRouter, vendorRouter, shoppingRouter, customerRouter } from '../routes';
 
 export default async (app: Application) => {
 
@@ -20,6 +20,8 @@ export default async (app: Application) => {
 
     app.use('/api/v1', adminRouter);
     app.use('/api/v1', vendorRouter);
+    app.use('/api/v1', shoppingRouter);
+    app.use('/api/v1', customerRouter)
 
     return app;
 }

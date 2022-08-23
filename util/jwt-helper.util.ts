@@ -4,7 +4,7 @@ import { JWT_SECRET } from '../configs';
 import { vendorPayload } from '../dto';
 import { authPayload } from '../dto/auth.dto';
 
-export const generateAuthToken = async (payload: vendorPayload) => {
+export const generateAuthToken = async (payload: authPayload) => {
     return await jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 }
 
