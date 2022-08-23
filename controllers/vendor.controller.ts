@@ -1,7 +1,8 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import { findVendor } from '../controllers/admin.controller';
 import { validatePassword, generateAuthToken } from '../util';
-import { editVendorDTO } from '../dto';
+import { editVendorDTO, createFoodDTO } from '../dto';
+import { Food } from '../models'
 
 export const login = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
@@ -117,5 +118,73 @@ export const changeVendorServiceProfile = async (req: Request, res: Response, ne
         });
     } catch (err) {
         next(err);
+    }
+}
+
+export const addFood = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (user) {
+
+        const { name, description, category, foodType, readyTime, price } = <createFoodDTO>req.body;
+
+
+        const vendor = await findVendor(user._id);
+
+        if (vendor !== null) {
+
+            const files = req.files as [Express.Multer.File];
+
+            const images = files.map((file: Express.Multer.File) => file.filename);
+
+            const food = await Food.create({
+                vendor_id: vendor._id,
+                name,
+                description,
+                category,
+                foodType,
+                readyTime,
+                price,
+                image: images,
+                ratings: 0
+            });
+
+            vendor.foods.push(food);
+
+            const result = await vendor.save();
+
+            return res.status(200).json({
+                message: 'Food added successfully',
+                result
+            });
+        }
+
+        return res.status(404).json({
+            message: 'Vendor Not Found!'
+        });
+    }
+}
+
+
+export const fetchFood = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    try {
+        if (user) {
+
+            const foods = await Food.find({vendor_id: user._id});
+
+            if (foods !== null) {
+                return res.status(200).json({
+                    foods
+                });
+            }
+
+            return res.status(404).json({
+                message: 'Food Information Not Found!'
+            });
+        }
+    } catch (error) {
+        next(error);
     }
 }

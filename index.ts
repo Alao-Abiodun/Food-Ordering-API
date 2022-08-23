@@ -1,6 +1,7 @@
 import express, {Request, Response, NextFunction} from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
+import path from 'path';
 
 import { MONGO_URI, PORT } from './configs';
 
@@ -9,7 +10,8 @@ import { adminRouter, vendorRouter } from './routes';
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static('images'));
 
 app.use(morgan('dev'));
 

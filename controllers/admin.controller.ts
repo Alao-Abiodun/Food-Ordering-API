@@ -36,7 +36,8 @@ export const createVendor = async (req: Request, res: Response, next: NextFuncti
             password: hashedPassword,
             serviceAvailable: false,
             coverImages: [],
-            rating: 0
+            rating: 0,
+            foods: []
         });
     
         res.status(201).json({

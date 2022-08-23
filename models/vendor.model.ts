@@ -12,7 +12,7 @@ export interface IVendor extends Document {
     serviceAvailable: boolean;
     coverImages: [string];
     rating: number;
-    // food: any
+    foods: any
 }
 
 const vendorSchema: Schema = new Schema({
@@ -27,10 +27,12 @@ const vendorSchema: Schema = new Schema({
     serviceAvailable: { type: Boolean, required: true },
     coverImages: { type: [String], required: true },
     rating: { type: Number, required: true },
-    // food: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Food'
-    // }
+    foods: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Food'
+        }
+    ]
 }, {
     toJSON: {
         transform(doc, ret) {
