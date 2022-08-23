@@ -6,7 +6,7 @@ export interface IFood extends Document {
     description: string;
     category: string;
     foodType: string;
-    readyTime: string;
+    readyTime: number;
     price: number;
     images: [string];
     ratings: number;
@@ -18,7 +18,7 @@ const FoodSchema: Schema = new Schema({
     description: { type: String, required: true },
     category: { type: String, required: true },
     foodType: { type: String, required: true },
-    readyTime: { type: String, required: true },
+    readyTime: { type: Number, required: true },
     price: { type: Number, required: true },
     images: { type: [String], required: true },
     ratings: { type: Number }

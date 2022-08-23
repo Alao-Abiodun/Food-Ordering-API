@@ -3,6 +3,6 @@ export interface createFoodDTO {
     description: string;
     category: string;
     foodType: string;
-    readyTime: string;
+    readyTime: number;
     price: number
 }
