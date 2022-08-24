@@ -1,15 +1,20 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+
+import { signUp, signIn, verify, fetchProfile, editProfile } from '../controllers'
+import { Authenticate } from '../middlewares';
 
 const router = express.Router();
 
-router.post('/user/signup');
+router.post('/customer/signup', signUp);
 
-router.post('/user/login');
+router.post('/customer/login', signIn);
 
-router.get('/user/verify');
+router.use(Authenticate)
 
-router.get('user/profile');
+router.patch('/customer/verify', verify);
 
-router.get('/profile/:id')
+router.get('/customer/profile', fetchProfile);
+
+router.patch('/customer/profile/:id', editProfile);
 
 export { router as customerRouter }
