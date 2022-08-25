@@ -30,3 +30,8 @@ export interface customerPayload {
     email: string;
     verified: boolean;
 }
+
+export class orderInputDTO {
+    _id: string;
+    unit: number
+}

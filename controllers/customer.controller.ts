@@ -1,8 +1,8 @@
 import express , { Request, Response, NextFunction} from 'express';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
-import { createCustomerDTO, createCustomerLoginDTO, editCustomerProfile } from '../dto';
-import { Customer } from '../models';
+import { createCustomerDTO, createCustomerLoginDTO, editCustomerProfile, orderInputDTO } from '../dto';
+import { Customer, Food, Order } from '../models';
 import { generateOtp, onRequestOtp, hashPassword, validatePassword, generateAuthToken } from '../util'
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
@@ -173,5 +173,99 @@ export const editProfile = async (req: Request, res: Response, next: NextFunctio
                 updatedCustomerProfile
             })
         }
+    }
+}
+
+export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const customer = req.user;
+
+    if (customer) {
+
+        const orderId = Math.floor((Math.random() * 899999) + 1000);
+
+        const profile = await Customer.findById( customer._id )
+
+        const cart = <[orderInputDTO]>req.body;
+
+        const cartItems = Array();
+
+        let netAmount = 0.0;
+
+        const foods = await Food.find().where('_id').in(cart.map(item => item._id)).exec();
+
+        foods.map(food => {
+
+            cart.map(({ _id, unit }) => {
+                if (food._id == _id) {
+                    netAmount += (food.price * unit);
+                    cartItems.push({food, unit})
+                }
+            })
+        })
+
+        if (cartItems) {
+
+            const currentOrder = await Order.create({
+                order_id: orderId,
+                items: cartItems,
+                totalAmount: netAmount,
+                orderDate: new Date(),
+                paidThrough: 'COD',
+                paymentResponse: '',
+                orderStatus: 'Waiting'
+            })
+
+            if (currentOrder) {
+
+                profile.orders.push(currentOrder);
+                await profile.save();
+
+                return res.status(201).json(currentOrder);
+            }
+        }
+
+    }
+
+    return res.status(400).json({message: 'Error while create an order'});
+    } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+export const fetchOrders = async (req: Request, res: Response, next: NextFunction) => {
+
+    const customer = req.user;
+
+    if (customer) {
+
+        const orders = await Customer.findById( customer._id ).populate('orders');
+
+        if (orders) {
+
+            return res.status(200).json({
+                message: 'Fetch Orders',
+                orders
+            })
+        }
+    }
+
+    return res.send(400).json({message: 'Error while fetching Orders'});
+}
+
+export const fetchAOrder = async (req: Request, res: Response, next: NextFunction) => {
+
+    const customer = req.user;
+
+    const { id } = req.params;
+
+    if (customer) {
+
+        const orders = await Order.findById(id).populate('items.food');
+
+        return res.status(200).json({ orders })
     }
 }
