@@ -13,6 +13,7 @@ export interface ICustomer extends Document {
     otp_expiry: Date;
     lat: number;
     lng: number;
+    cart: [any]
     orders: [IOrder]
 }
 
@@ -28,6 +29,12 @@ const customerSchema: Schema = new Schema({
     otp_expiry: { type: Date},
     lat: { type: Number},
     lng: { type: Number},
+    cart: [
+        {
+            food: { type: Schema.Types.ObjectId, required: true, ref: 'Food' },
+            unit: { type: Number, required: true },
+        }
+    ],
     orders: [
         {
             type: Schema.Types.ObjectId,

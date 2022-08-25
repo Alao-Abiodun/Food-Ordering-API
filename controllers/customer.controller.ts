@@ -4,6 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { createCustomerDTO, createCustomerLoginDTO, editCustomerProfile, orderInputDTO } from '../dto';
 import { Customer, Food, Order } from '../models';
 import { generateOtp, onRequestOtp, hashPassword, validatePassword, generateAuthToken } from '../util'
+import axios from 'axios';
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -189,7 +190,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
         const cart = <[orderInputDTO]>req.body;
 
-        const cartItems = Array();
+        const cartItems = [];
 
         let netAmount = 0.0;
 
@@ -268,4 +269,147 @@ export const fetchAOrder = async (req: Request, res: Response, next: NextFunctio
 
         return res.status(200).json({ orders })
     }
+}
+
+export const addToCart = async (req: Request, res: Response, next: NextFunction) => {
+
+    const customer = req.user;
+
+    if (customer) {
+
+        const profile = await  Customer.findById( customer._id )
+
+        let cartItems = [];
+
+        const { _id, unit } = <orderInputDTO>req.body;
+
+        const food = await Food.findById(_id);
+
+        if (food) {
+
+            if (profile !== null) {
+
+                cartItems = profile.cart;
+
+                console.log('CART-ITEM:', cartItems);
+
+                if (cartItems.length > 0) {
+
+                    let existingFoodItem = cartItems.filter((item) => item.food._id.toString() === _id);
+
+                    console.log('EXISTING-ITEM:', existingFoodItem);
+
+                    if (existingFoodItem.length > 0) {
+
+                        const index = cartItems.indexOf(existingFoodItem[0]);
+
+                        if (unit > 0) {
+
+                            cartItems[index] = { food, unit };
+
+                        } else {
+
+                            cartItems.splice(index, 1);
+
+                        }
+
+                    } else {
+
+                        cartItems.push({ food, unit });
+
+                    }
+
+                } else {
+
+                    cartItems.push({ food, unit });
+
+                }
+
+                if (cartItems) {
+
+                    profile.cart = cartItems as any
+                    const result = await profile.save();
+                    return res.status(201).json(result.cart);
+
+                }
+            }
+        }
+    }
+
+    return res.status(400).json({ message: 'Unable to add to cart'});
+}
+
+export const getCart = async (req: Request, res: Response, next: NextFunction) => {
+
+    const customer = req.user;
+
+    if (customer) {
+
+        const profile = await  Customer.findById( customer._id )
+
+        if (profile !== null) {
+
+            const customerCart = profile.cart;
+
+            return res.status(200).json({
+                cart: customerCart,
+            })
+        }
+    }
+
+    return res.status(400).json({message: 'Cart is empty!'})
+
+}
+
+export const removeCart = async (req: Request, res: Response, next: NextFunction) => {
+
+    const customer = req.user;
+
+    if (customer) {
+
+        const profile = await Customer.findById( customer._id );
+
+        if (profile !== null) {
+            profile.cart = [] as any;
+
+            const customerCart = await profile.save();
+
+            return res.status(200).json(customerCart);
+        }
+    }
+
+    return res.status(400).json({message: 'Cart is already empty'});
+}
+
+export const fetchAPI = async (req: Request, res: Response, next: NextFunction) => {
+
+    const { id } = req.params;
+    const response = await axios({
+        method: "get",
+        url: `https://anapioficeandfire.com/api/books/${id}`,
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+      });
+
+      const {characters} = await response.data;
+      for (const character of characters) {
+        const responseB = await axios({
+            method: "get",
+            url: `${character}`,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+          });
+          const { name } = await responseB.data;
+        return res.status(200).json({
+            name
+          })
+      }
+    //   return res.status(200).json({
+    //     numberOfCharacters: characters.length,
+    //     characters,
+    //   })
 }
