@@ -2,12 +2,14 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import { findVendor } from '../controllers/admin.controller';
 import { validatePassword, generateAuthToken } from '../util';
 import { editVendorDTO, createFoodDTO } from '../dto';
-import { Food } from '../models'
+import { Food, Order } from '../models'
 
 export const login = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         const { email, password } = req.body;
         const vendor = await findVendor('', email);
+
+        console.log(vendor);
 
         if (vendor) {
             const validation = await validatePassword(password, vendor.password);
@@ -220,4 +222,70 @@ export const fetchFood = async (req: Request, res: Response, next: NextFunction)
     } catch (error) {
         next(error);
     }
+}
+
+export const fetchCurrentOrder = async (req: Request, res: Response, next: NextFunction) => {
+
+    const user = req.user;
+
+    console.log("USER:",user);
+
+    // if (user) {
+
+    //     const orders = await Order.find({ vendor_id: user._id}).populate('items.food');
+
+    //     if (orders !== null) {
+    //         return res.status(200).json(orders)
+    //     }
+
+    // }
+
+    // return res.status(400).json({message: 'Order Not Found!'})
+}
+
+export const processOrder = async (req: Request, res: Response, next: NextFunction) => {
+
+    const  { id } = req.params;
+
+    const { status, remarks, time } = req.body;
+
+    if (id) {
+
+        const order = await Order.findById(id).populate('items.food');
+
+        order.orderStatus = status;
+        order.remarks = remarks;
+        if (time) {
+            order.readyTime = time;
+        }
+
+        const orderResult = order.save();
+
+        if (orderResult !== null) {
+            
+            return res.status(200).json(orderResult);
+
+        }
+    }
+
+    return res.status(400).json({message: 'Unable to process order. Please try again'})
+
+}
+
+export const fetchOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
+
+    const { id } = req.params;
+
+    if (id) {
+
+        const order = await Order.findById(id).populate('items.food');
+
+        if (order !== null) {
+            return res.status(200).json(order)
+        }
+
+    }
+
+    return res.status(400).json({message: 'Order Not Found!'})
+
 }

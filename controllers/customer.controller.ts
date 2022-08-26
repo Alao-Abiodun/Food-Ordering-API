@@ -196,10 +196,12 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
         const foods = await Food.find().where('_id').in(cart.map(item => item._id)).exec();
 
-        foods.map(food => {
+        let vendor_id;
 
+        foods.map(food => {
             cart.map(({ _id, unit }) => {
                 if (food._id == _id) {
+                    vendor_id = food.vendor_id;
                     netAmount += (food.price * unit);
                     cartItems.push({food, unit})
                 }
@@ -210,21 +212,25 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
             const currentOrder = await Order.create({
                 order_id: orderId,
+                vendor_id: vendor_id,
                 items: cartItems,
                 totalAmount: netAmount,
                 orderDate: new Date(),
                 paidThrough: 'COD',
                 paymentResponse: '',
-                orderStatus: 'Waiting'
+                orderStatus: 'Waiting',
+                remarks: '',
+                delivery_id: '',
+                appliedOffer: false,
+                offerId: null,
+                readyTime: 45
             })
 
-            if (currentOrder) {
-
+                profile.cart = [] as any;
                 profile.orders.push(currentOrder);
                 await profile.save();
 
                 return res.status(201).json(currentOrder);
-            }
         }
 
     }
