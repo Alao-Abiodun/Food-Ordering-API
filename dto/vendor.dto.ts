@@ -1,7 +1,7 @@
 export interface CreateVendorDTO{
     name: string;
     ownerName: string;
-    foodTypes: [string];
+    foodType: [string];
     pincode: string;
     address: string;
     phone: string;
@@ -22,7 +22,7 @@ export interface vendorPayload {
 
 export interface editVendorDTO{
     name: string;
-    foodTypes: [string];
+    foodType: [string];
     phone: string;
     address: string;
 }

@@ -1,18 +1,16 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import { findVendor } from '../controllers/admin.controller';
 import { validatePassword, generateAuthToken } from '../util';
-import { editVendorDTO, createFoodDTO } from '../dto';
+import { editVendorDTO, createFoodDTO, loginVendorDTO } from '../dto';
 import { Food, Order } from '../models'
 
 export const login = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = <loginVendorDTO>req.body;
         const vendor = await findVendor('', email);
 
-        console.log(vendor);
-
         if (vendor) {
-            const validation = await validatePassword(password, vendor.password);
+            const validVendor = await validatePassword(password, vendor.password);
 
             const token = await generateAuthToken({
                 _id: vendor._id,
@@ -20,7 +18,7 @@ export const login = async (req: express.Request, res: express.Response, next: e
                 name: vendor.name,
             });
 
-            if (validation) {
+            if (validVendor) {
                 return res.status(200).json({
                     message: 'Vendor logged in successfully',
                     token,
@@ -67,7 +65,7 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
 
 export const changeVendorProfile = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { name, address, phone, foodTypes } = <editVendorDTO>req.body;
+    const { name, address, phone, foodType } = <editVendorDTO>req.body;
 
     const user = req.user;
 
@@ -79,7 +77,7 @@ export const changeVendorProfile = async (req: Request, res: Response, next: Nex
             vendor.name = name;
             vendor.address = address;
             vendor.phone = phone;
-            vendor.foodTypes = foodTypes;
+            vendor.foodType = foodType;
 
             const updatedVendor = await vendor.save();
 

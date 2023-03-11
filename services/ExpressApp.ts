@@ -14,7 +14,7 @@ export default async (app: Application) => {
     app.use(morgan('dev'));
 
     app.get('/', (req, res) => {
-        res.json({ message: 'Hello World! from Food Order Backend' });
+        res.json({ message: 'Hello World! from Food Ordering API' });
     })
     
 

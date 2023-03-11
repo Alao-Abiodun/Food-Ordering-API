@@ -1,5 +1,9 @@
 import bcrypt from 'bcryptjs';
 
+export const generateSalt = (salt: number) => {
+   return bcrypt.genSaltSync(salt);
+}
+
 export const hashPassword = async (password: string)=> {
     return await bcrypt.hash(password, 10);
 }

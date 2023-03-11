@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import {CreateVendorDTO} from '../dto';
 import { Vendor } from '../models';
-import { hashPassword } from '../util/password.util';
+import { hashPassword, generateSalt } from '../util/password.util';
 
 export const findVendor = (id: string | undefined, email?: string) => {
     if (email) {
@@ -13,7 +13,7 @@ export const findVendor = (id: string | undefined, email?: string) => {
 
 export const createVendor = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, ownerName, foodTypes, pincode, address, phone, email, password } = <CreateVendorDTO>req.body;
+        const { name, ownerName, foodType, pincode, address, phone, email, password } = <CreateVendorDTO>req.body;
         
         const existingVendor = await findVendor('', email);
         if (existingVendor) {
@@ -28,12 +28,13 @@ export const createVendor = async (req: Request, res: Response, next: NextFuncti
         const vendor = await Vendor.create({
             name,
             ownerName,
-            foodTypes,
+            foodType,
             pincode,
             address,
             phone,
             email,
             password: hashedPassword,
+            salt: generateSalt(3),
             serviceAvailable: false,
             coverImages: [],
             rating: 0,
