@@ -16,6 +16,10 @@ export const fetchFoodAvailability = async (req: Request, res: Response, next: N
             })
         }
 
+        return res.status(404).json({
+            message: "Food availability is not found",
+        })
+
     } catch (error) {
         return res.status(500).json({
             message: 'Server Error',
@@ -30,7 +34,7 @@ export const fetchTopRestaurants = async (req: Request, res: Response, next: Nex
         
         const { pincode } = req.params;
 
-        const foodAvailableForVendors = await Vendor.find({pincode, serviceAvailable: true}).sort({'rating': 1}).populate('foods').limit(10);
+        const foodAvailableForVendors = await Vendor.find({pincode, serviceAvailable: true}).sort({'rating': 1}).populate('foods').limit(1);
 
         if (foodAvailableForVendors.length > 0) {
             return res.status(200).json({

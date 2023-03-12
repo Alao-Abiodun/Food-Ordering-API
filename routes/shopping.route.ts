@@ -12,6 +12,6 @@ router.get('/food-in-30-mins/:pincode', fetchFoodIn30Min);
 
 router.get('/search/:pincode', searchFoods);
 
-router.get('restaurants/:id', fetchRestaurants);
+router.get('/restaurants/:id', fetchRestaurants);
 
 export { router as shoppingRouter}

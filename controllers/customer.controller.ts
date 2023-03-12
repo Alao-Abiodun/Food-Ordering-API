@@ -3,12 +3,12 @@ import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { createCustomerDTO, createCustomerLoginDTO, editCustomerProfile, orderInputDTO } from '../dto';
 import { Customer, Food, Order } from '../models';
-import { generateOtp, onRequestOtp, hashPassword, validatePassword, generateAuthToken } from '../util'
+import { generateOtp, onRequestOtp, hashPassword, validatePassword, generateAuthToken, generateSalt } from '../util'
 import axios from 'axios';
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
-
-    const customerInputs = plainToClass(createCustomerDTO, req.body);
+    try {
+        const customerInputs = plainToClass(createCustomerDTO, req.body);
 
     const inputErrors = await validate(customerInputs, {validationError: { target: true}});
 
@@ -24,9 +24,16 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
     // invoke otp function
     const { otp, otp_expiry } =  await generateOtp();
 
+    const customerExist = await Customer.findOne({email: email});
+
+    if (customerExist !== null) {
+        return res.status(401).json({message: 'A user with the same email already exists'})
+    }
+
     const result = await Customer.create({
-        email: email,
+        email: email, 
         password: hashedPassword,
+        salt: generateSalt(3), 
         phone,
         otp,
         otp_expiry,
@@ -41,7 +48,9 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
     if (result) {
 
         // send user otp
-        // await onRequestOtp(otp, phone);
+        const resp = await onRequestOtp(otp, phone);
+
+        console.log("resp:", resp);
 
         // generate a token
         const signature = await generateAuthToken({
@@ -52,7 +61,8 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
 
         return res.status(201).json({
             token: signature,
-            result
+            verified: result.verified,
+            email: result.email
         })
 
     }
@@ -60,7 +70,12 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
     return res.status(401).json({
         message: 'Error occur while create a new customer'
     })
-
+    } catch (error) {
+        console.log("error", error);
+        return res.status(500).json({
+            message: 'Error occurred while creating' 
+        })
+    }
 }
 
 export const signIn = async (req: Request, res: Response, next: NextFunction) => {

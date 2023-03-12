@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+const { ACCOUNT_SID, ACCOUNT_TOKEN } = process.env;
+
 export const generateOtp =  () => {
 
     const otp = Math.floor(10000 + Math.random() * 900000); // create a random numbers of 6 digits
@@ -10,15 +15,15 @@ export const generateOtp =  () => {
 }
 
 export const onRequestOtp =  async (otp: number, toPhoneNumber: string) => {
-    const accountSid = '';
-    const authToken = '';
+    const accountSid = ACCOUNT_SID;
+    const authToken = ACCOUNT_TOKEN;
 
     const client = require('twilio')(accountSid, authToken);
 
-    const response = await client.message.create({
+    const response = await client.messages.create({
         body: `Your OTP is ${otp}`,
-        from: '',
-        to: toPhoneNumber
+        from: '+15673393575',
+        to: `+234${toPhoneNumber}` 
     })
 
     return response;

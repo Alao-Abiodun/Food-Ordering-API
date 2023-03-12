@@ -4,7 +4,7 @@ import { MONGO_URI } from '../configs';
 export default async() => {
 
    try {
-    mongoose.connect(MONGO_URI).then(() => {
+    mongoose.connect(String(MONGO_URI)).then(() => {
         console.log('Connected to MongoDB');
     }).catch(err => {
         console.log(err);

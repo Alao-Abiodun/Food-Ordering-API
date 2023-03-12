@@ -167,7 +167,7 @@ export const changeVendorServiceProfile = async (req: Request, res: Response, ne
     }
 }
 
-export const addFood = async (req: Request, res: Response, next: NextFunction) => {
+export const  addFood = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
 
     if (user) {
@@ -179,9 +179,9 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
 
         if (vendor !== null) {
 
-            // const files = req.files as [Express.Multer.File];
+            const files = req.files as [Express.Multer.File];
 
-            // const images = files.map((file: Express.Multer.File) => file.filename);
+            const images = files.map((file: Express.Multer.File) => file.filename);
 
             const food = await Food.create({
                 vendor_id: vendor._id,
@@ -191,7 +191,7 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
                 foodType,
                 readyTime,
                 price,
-                images: ['mock.jpg'  ],
+                images: images,
                 ratings: 0
             });
 

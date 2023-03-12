@@ -8,6 +8,7 @@ export interface ICustomer extends Document {
     phone: string;
     email: string;
     password: string;
+    salt:string;
     verified: boolean;
     otp: number;
     otp_expiry: Date;
@@ -24,6 +25,7 @@ const customerSchema: Schema = new Schema({
     phone: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },
+    salt: { type: String, required: true },
     verified: { type: Boolean },
     otp: { type: Number},
     otp_expiry: { type: Date},
