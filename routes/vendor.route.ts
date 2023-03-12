@@ -23,11 +23,11 @@ router.get('/profile', Authenticate,getProfile);
 
 router.put('/profile/:id', Authenticate, changeVendorProfile);
 
-router.purge('/profile/coverimage/:id', Authenticate, images.array('images', 11), updateVendorCoverImages);
+router.patch('/profile/coverimage/:id', Authenticate, images.array('images', 11), updateVendorCoverImages);
 
 router.patch('/profile/service/:id', Authenticate, changeVendorServiceProfile);
 
-router.post('/food', Authenticate, images.array('images', 11), addFood);
+router.post('/food', Authenticate, addFood);
 router.get('/foods', Authenticate, fetchFood)
 
 // order

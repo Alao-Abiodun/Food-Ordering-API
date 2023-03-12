@@ -3,6 +3,7 @@ import { findVendor } from '../controllers/admin.controller';
 import { validatePassword, generateAuthToken } from '../util';
 import { editVendorDTO, createFoodDTO, loginVendorDTO } from '../dto';
 import { Food, Order } from '../models'
+import { uploadFile } from '../util/fileHandler';
 
 export const login = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
@@ -99,29 +100,40 @@ export const updateVendorCoverImages = async (req: Request, res: Response, next:
     try {
         const user = req.user;
 
-        if (user) {
+        const {file} = req;
 
-            const vendor = await findVendor(user._id);
+        console.log(file);
 
-            const files = req.files as [Express.Multer.File];
 
-            const images = files.map((file: Express.Multer.File) => file.filename);
+        // if (user) {
 
-            if (vendor !== null) {
-                vendor.coverImages.push(...images);
+        //     const vendor = await findVendor(user._id);
 
-                const result = await vendor.save();
+        //     const resp = req.files;
 
-                return res.status(200).json({
-                    message: 'vendor cover images updated successfully',
-                    result
-                })
-            }
-        }
+        //     console.log(resp);
 
-        return res.status(404).json({
-            message: 'Vendor Not Found!'
-        });
+        //     // const files = req.files as [Express.Multer.File];
+
+        //     // const images = files.map((file: Express.Multer.File) => file.filename);
+
+        //     if (vendor !== null) {
+
+        //         await Promise.all([
+        //             vendor.coverImages.push(...images),
+        //             vendor.save()
+        //         ])
+
+        //         return res.status(200).json({
+        //             message: 'vendor cover images updated successfully',
+        //             vendor
+        //         })
+        //     }
+        // }
+
+        // return res.status(404).json({
+        //     message: 'Vendor Not Found!'
+        // });
     } catch (error) {
         next(error);
         console.log(error.message);
@@ -137,13 +149,14 @@ export const changeVendorServiceProfile = async (req: Request, res: Response, ne
 
             const vendor = await findVendor(user._id);
 
-            vendor.serviceAvailable = !vendor.serviceAvailable;
-
-            const updatedVendor = await vendor.save();
+            await Promise.all([
+                vendor.serviceAvailable = !vendor.serviceAvailable,
+                await vendor.save()
+            ])
 
             return res.status(200).json({
                 message: 'Vendor service profile updated successfully',
-                vendor: updatedVendor
+                vendor
             });
         }
         return res.status(404).json({
@@ -166,9 +179,9 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
 
         if (vendor !== null) {
 
-            const files = req.files as [Express.Multer.File];
+            // const files = req.files as [Express.Multer.File];
 
-            const images = files.map((file: Express.Multer.File) => file.filename);
+            // const images = files.map((file: Express.Multer.File) => file.filename);
 
             const food = await Food.create({
                 vendor_id: vendor._id,
@@ -178,17 +191,18 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
                 foodType,
                 readyTime,
                 price,
-                image: images,
+                images: ['mock.jpg'  ],
                 ratings: 0
             });
 
-            vendor.foods.push(food);
-
-            const result = await vendor.save();
+            await Promise.all([
+                vendor.foods.push(food),
+                vendor.save(),
+            ])
 
             return res.status(200).json({
                 message: 'Food added successfully',
-                result
+                vendor
             });
         }
 
@@ -199,7 +213,7 @@ export const addFood = async (req: Request, res: Response, next: NextFunction) =
 }
 
 
-export const fetchFood = async (req: Request, res: Response, next: NextFunction) => {
+export const fetchFood = async (req: Request, res: Response, next: NextFunction) => { 
     const user = req.user;
 
     try {

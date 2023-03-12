@@ -15,6 +15,8 @@ export const Authenticate = async (req: Request, res: Response, next: NextFuncti
     try {
         const validate = await verifyAuthToken(req);
 
+        console.log(`Authenticate: ${validate}`);
+
     if (validate) {
         next();
     }
