@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const { ACCOUNT_SID, ACCOUNT_TOKEN } = process.env;
+const { ACCOUNT_SID, ACCOUNT_TOKEN, ACCOUNT_PHONE_NUMBER } = process.env;
 
 export const generateOtp =  () => {
 
@@ -22,7 +22,7 @@ export const onRequestOtp =  async (otp: number, toPhoneNumber: string) => {
 
     const response = await client.messages.create({
         body: `Your OTP is ${otp}`,
-        from: '+15673393575',
+        from: ACCOUNT_PHONE_NUMBER,
         to: `+234${toPhoneNumber}` 
     })
 
